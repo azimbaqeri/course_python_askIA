@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="bg-shape bg-shape-one" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-two" aria-hidden="true"></div>
+
+    <main class="page">
+        <section class="card">
+            <p class="eyebrow">Assistant IA personnel</p>
+            <h1>Ask AI</h1>
+            <p class="subtitle">Pose ta question et recois une reponse claire, lisible et immediate.</p>
+
+            <form id="ask-form" class="ask-form" action="{{ url_for('index') }}" method="POST" name="ask_ai">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label class="sr-only" for="question">Question</label>
+                <input id="question" type="text" name="question" value="{{ question }}"
+                    placeholder="Ex: Explique-moi la difference entre liste et tuple en Python" required>
+                <button id="submit-btn" type="submit">Poser la question</button>
+            </form>
+
+            <section class="answer" aria-live="polite">
+                <h2>Reponse</h2>
+                {% if message %}
+                <div class="answer-content">{{ message }}</div>
+                {% else %}
+                <p class="empty">Aucune question posee pour le moment.</p>
+                {% endif %}
+            </section>
+        </section>
+    </main>
+
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+        <div class="loading-card" role="status" aria-live="polite">
+            <div class="loading-illustration" aria-hidden="true">
+                <span class="orbit orbit-one"></span>
+                <span class="orbit orbit-two"></span>
+                <span class="core">AI</span>
+            </div>
+            <h3>L'IA reflechit tres fort...</h3>
+            <p id="loading-text" class="loading-text">Preparation de la reponse intelligente...</p>
+            <div class="loading-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var form = document.getElementById("ask-form");
+            var overlay = document.getElementById("loading-overlay");
+            var loadingText = document.getElementById("loading-text");
+            var submitBtn = document.getElementById("submit-btn");
+
+            if (!form || !overlay || !loadingText || !submitBtn) {
+                return;
+            }
+
+            var jokes = [
+                "L'IA cherche ses meilleures neurones...",
+                "Consultation urgente du conseil des robots...",
+                "Calibration de la machine a bonnes idees...",
+                "Ajout d'une pincette de genie numerique...",
+                "Verification anti-reponse bizarre en cours..."
+            ];
+
+            var idx = 0;
+            var timerId = null;
+
+            form.addEventListener("submit", function () {
+                overlay.classList.add("is-visible");
+                overlay.setAttribute("aria-hidden", "false");
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Envoi...";
+
+                loadingText.textContent = jokes[idx];
+                timerId = window.setInterval(function () {
+                    idx = (idx + 1) % jokes.length;
+                    loadingText.textContent = jokes[idx];
+                }, 1300);
+            });
+
+            window.addEventListener("pageshow", function () {
+                if (timerId) {
+                    window.clearInterval(timerId);
+                }
+                overlay.classList.remove("is-visible");
+                overlay.setAttribute("aria-hidden", "true");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Poser la question";
+            });
+        })();
+    </script>
+
+</body>
+
+</html>
